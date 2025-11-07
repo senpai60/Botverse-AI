@@ -1,10 +1,38 @@
 @import "tailwindcss";
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* 👇 Custom animation inside a Tailwind layer */
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-in-out;
+  }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-in-out;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+.animate-slideDown {
+  animation: slideDown 0.4s ease-out forwards;
+}
+
+
+
+

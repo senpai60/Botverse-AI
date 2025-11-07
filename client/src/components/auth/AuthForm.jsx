@@ -1,27 +1,41 @@
 import { useState } from "react";
 import InputField from "./InputField";
+import { useAuthContext } from "../../context/AuthContext";
+import {useNavigate} from 'react-router-dom'
 
 const AuthForm = ({ isLogin }) => {
+  const { login, signup, loading } = useAuthContext();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
 
+  const navigate = useNavigate()
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(isLogin ? "Logging in..." : "Signing up...", formData);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    if (isLogin) {
+      await login(formData.email, formData.password);
+    } else {
+      await signup(formData.username, formData.email, formData.password);
+    }
+    navigate("/"); // ✅ move this outside
+  } catch (err) {
+    console.error(err);
+    alert(err);
+  }
+};
+
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-5 w-full animate-fadeIn"
-    >
+    <form onSubmit={handleSubmit} className="space-y-5 w-full animate-fadeIn">
       {!isLogin && (
         <InputField
           label="Username"

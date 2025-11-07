@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-
 import { authApi } from "../api/authApi";
 
 const AuthContext = createContext();
@@ -15,20 +14,27 @@ export const AuthProvider = ({ children }) => {
   const verifyUser = async () => {
     try {
       const res = await authApi.get("/verifyUser");
-      setUser(res.data.user);
-    } catch {
+      const verifiedUser = res.data?.data?.user || res.data?.user; // ✅ FIX
+      console.log("✅ verifyUser response:", verifiedUser);
+      setUser(verifiedUser);
+      return verifiedUser;
+    } catch (err) {
+      console.error("❌ verifyUser failed:", err.response?.data || err.message);
       setUser(null);
+      return null;
     } finally {
-      setLoading(false); // ✅ important here
+      setLoading(false);
     }
   };
 
-  // ✅ login/signup handle their own loading locally (in component)
   const login = async (email, password) => {
     try {
       const res = await authApi.post("/login", { email, password });
-      setUser(res.data.user);
+      const loggedInUser = res.data?.data?.user || res.data?.user; // ✅ FIX
+      console.log("✅ login response:", loggedInUser);
+      setUser(loggedInUser);
       await verifyUser();
+      return loggedInUser;
     } catch (err) {
       throw err.response?.data?.message || "Login failed";
     }
@@ -37,8 +43,11 @@ export const AuthProvider = ({ children }) => {
   const signup = async (username, email, password) => {
     try {
       const res = await authApi.post("/signup", { username, email, password });
-      setUser(res.data.user);
+      const newUser = res.data?.data?.user || res.data?.user; // ✅ FIX
+      console.log("✅ signup response:", newUser);
+      setUser(newUser);
       await verifyUser();
+      return newUser;
     } catch (err) {
       throw err.response?.data?.message || "Signup failed";
     }

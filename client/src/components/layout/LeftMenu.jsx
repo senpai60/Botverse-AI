@@ -63,7 +63,9 @@ const LeftMenu = () => {
       <div className="flex-1 overflow-y-auto px-6 py-3 space-y-2">
         <div className="flex items-center justify-between text-white/60 mb-2">
           <span className="text-sm uppercase tracking-wider">Chats</span>
-          <PlusCircle className="w-5 h-5 hover:text-pink-400 cursor-pointer" />
+          <Link to={"/create-bot"}>
+          <PlusCircle  className="w-5 h-5 hover:text-pink-400 cursor-pointer" />
+          </Link>
         </div>
 
         {chats.map((chat) => (

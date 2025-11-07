@@ -1,9 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../context/AuthContext";
 import AuthForm from "../components/auth/AuthForm";
 import AuthHeader from "../components/auth/AuthHeader";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { user, loading } = useAuthContext();
+  const navigate = useNavigate();
+
+  // 👇 redirect when user updates
+  useEffect(() => {
+    if (!loading && user) {
+      console.log("🚀 Redirecting because user is now logged in:", user);
+      navigate("/", { replace: true });
+    }
+  }, [user, loading, navigate]); // re-run when user changes
+
+  // while loading
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center text-xl text-pink-200">
+        Checking authentication...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-pink-900 to-black text-white px-4">

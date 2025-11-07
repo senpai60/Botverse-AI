@@ -2,16 +2,18 @@ import express from "express";
 const router = express.Router();
 
 import bcrypt from "bcrypt";
-
 import { config } from "../config/env.js";
 import { verifyAuth } from "../middlewares/verifyAuth.js";
-import {generateToken} from '../utils/generateToken.js'
+import { generateToken } from "../utils/generateToken.js";
 import { setAuthCookie } from "../utils/setAuthCookie.js";
 import { sendError, sendSuccess } from "../utils/responseHandler.js";
 
 // --- Database Models ---
 import User from "../models/User.js";
 
+/* ======================
+ ✅ Verify Authenticated User
+====================== */
 router.get("/verifyUser", verifyAuth, (req, res, next) => {
   try {
     const user = req.user;
@@ -24,6 +26,9 @@ router.get("/verifyUser", verifyAuth, (req, res, next) => {
   }
 });
 
+/* ======================
+ ✅ Signup Route
+====================== */
 router.post("/signup", async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -50,7 +55,7 @@ router.post("/signup", async (req, res, next) => {
     // 5️⃣ Generate JWT
     const token = generateToken(newUser);
 
-    // 6️⃣ Assign cookie
+    // 6️⃣ Set cookie
     setAuthCookie(res, token);
 
     // 7️⃣ Respond success
@@ -61,6 +66,62 @@ router.post("/signup", async (req, res, next) => {
         email: newUser.email,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* ======================
+ ✅ Login Route
+====================== */
+router.post("/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    console.log("🧠 LOGIN BODY:", req.body);
+
+    if (!email || !password)
+      return sendError(res, 400, "Please fill all required fields");
+
+    const user = await User.findOne({ email });
+    if (!user) return sendError(res, 404, "No account found with this email");
+
+    console.log("🧠 USER FOUND:", user);
+    console.log("🧠 PASSWORD FROM BODY:", password);
+    console.log("🧠 HASH FROM DB:", user.password);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) return sendError(res, 401, "Invalid email or password");
+
+    const token = generateToken(user);
+    setAuthCookie(res, token);
+
+    return sendSuccess(res, 200, "Login successful", {
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error("❌ LOGIN ERROR:", err.message);
+    next(err);
+  }
+});
+
+
+/* ======================
+ ✅ Logout Route
+====================== */
+router.post("/logout", (req, res, next) => {
+  try {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: config.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return sendSuccess(res, 200, "Logged out successfully");
   } catch (err) {
     next(err);
   }
