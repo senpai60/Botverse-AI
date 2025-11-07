@@ -70,7 +70,7 @@ const botSchema = new mongoose.Schema(
     modelPreference: { type: String, default: "gpt-5" },
 
     // 8️⃣ Developer Notes
-    createdBy: { type: String },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref:"User", required:true },
     createdAt: { type: Date, default: Date.now },
     version: { type: String, default: "1.0" },
     lastUpdated: { type: Date, default: Date.now },

@@ -87,4 +87,6 @@ botMemoryVaultSchema.methods.decayMemory = async function () {
   await this.save();
 };
 
+
+
 export default mongoose.model("BotMemoryVault", botMemoryVaultSchema);
