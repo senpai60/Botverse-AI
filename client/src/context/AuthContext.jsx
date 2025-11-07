@@ -1,21 +1,25 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authApi } from "../api/authApi";
+import { chatApi } from "../api/chatApi";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [chats, setChats] = useState([]); // ✅ FIX added this
 
-  useEffect(() => {
-    verifyUser();
+   useEffect(() => {
+    (async () => {
+      const verified = await verifyUser();
+      if (verified) await refreshChats(); // <-- 🔥 This line does the magic
+    })();
   }, []);
 
   const verifyUser = async () => {
     try {
       const res = await authApi.get("/verifyUser");
-      const verifiedUser = res.data?.data?.user || res.data?.user; // ✅ FIX
-      console.log("✅ verifyUser response:", verifiedUser);
+      const verifiedUser = res.data?.data?.user || res.data?.user;
       setUser(verifiedUser);
       return verifiedUser;
     } catch (err) {
@@ -30,8 +34,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await authApi.post("/login", { email, password });
-      const loggedInUser = res.data?.data?.user || res.data?.user; // ✅ FIX
-      console.log("✅ login response:", loggedInUser);
+      const loggedInUser = res.data?.data?.user || res.data?.user;
       setUser(loggedInUser);
       await verifyUser();
       return loggedInUser;
@@ -43,8 +46,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (username, email, password) => {
     try {
       const res = await authApi.post("/signup", { username, email, password });
-      const newUser = res.data?.data?.user || res.data?.user; // ✅ FIX
-      console.log("✅ signup response:", newUser);
+      const newUser = res.data?.data?.user || res.data?.user;
       setUser(newUser);
       await verifyUser();
       return newUser;
@@ -57,19 +59,36 @@ export const AuthProvider = ({ children }) => {
     try {
       await authApi.post("/logout");
       setUser(null);
+      setChats([]); // ✅ clear chats on logout
     } catch (err) {
       console.error("Logout error:", err);
+    }
+  };
+
+  const refreshChats = async () => {
+    try {
+      const res = await chatApi.get("/");
+      const chatList = res.data?.data || [];
+      setChats(chatList); // ✅ now this works
+      console.log("✅ chats updated:", chatList);
+      return chatList;
+    } catch (err) {
+      console.error("❌ refreshChats failed:", err.response?.data || err.message);
+      return [];
     }
   };
 
   const value = {
     user,
     setUser,
+    chats,       // ✅ exposed globally
+    setChats,    // ✅ exposed globally
     loading,
     login,
     signup,
     logout,
     verifyUser,
+    refreshChats,
   };
 
   return (

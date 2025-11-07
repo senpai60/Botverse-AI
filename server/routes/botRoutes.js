@@ -35,7 +35,7 @@ router.post("/create", verifyAuth, async (req, res, next) => {
     });
 
     const savedBot = await newBot.save();
-    const memoryVault = new MemoryVault.create({
+    const memoryVault = await MemoryVault.create({
         user:req.user.userId,
         bot:savedBot._id,
     })

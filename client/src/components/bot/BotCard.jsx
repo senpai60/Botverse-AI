@@ -1,7 +1,9 @@
 // src/components/BotCard.jsx
 import { Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const BotCard = ({ bot, onStartChat }) => {
+  const navigate = useNavigate();
   return (
     <div className="relative bg-gradient-to-br from-pink-300/30 to-purple-500/20 rounded-3xl border border-white/20 backdrop-blur-md shadow-xl p-5 transition-all hover:scale-[1.03] hover:shadow-pink-500/20 group">
       {/* Avatar */}
@@ -18,7 +20,9 @@ const BotCard = ({ bot, onStartChat }) => {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-white/70 mt-3 line-clamp-3">{bot.description}</p>
+      <p className="text-sm text-white/70 mt-3 line-clamp-3">
+        {bot.description}
+      </p>
 
       {/* Tags */}
       <div className="flex flex-wrap gap-2 mt-3">
@@ -34,14 +38,17 @@ const BotCard = ({ bot, onStartChat }) => {
 
       {/* CTA Button */}
       <button
-        onClick={() => onStartChat(bot._id)}
+        onClick={() => {
+          console.log("navigating to chat");
+          onStartChat(bot?._id)
+        }}
         className="mt-4 w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-xl flex items-center justify-center gap-2 font-medium transition-all hover:brightness-110 hover:shadow-pink-400/50"
       >
         <Sparkles className="w-4 h-4" /> Start Chat
       </button>
 
       {/* Glow effect */}
-      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-pink-400/10 to-purple-400/10 opacity-0 group-hover:opacity-100 blur-xl transition-all" />
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-pink-400/10 to-purple-400/10 opacity-0 group-hover:opacity-100 blur-xl transition-all pointer-events-none" />
     </div>
   );
 };

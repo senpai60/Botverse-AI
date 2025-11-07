@@ -6,12 +6,33 @@ import Profile from "./pages/Profile";
 import AuthPage from "./pages/AuthPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import gsap from "gsap";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import CreateBotPage from "./pages/CreateBotPage";
+import { botApi } from "./api/botApi";
+import {  useAuthContext } from "./context/AuthContext";
+
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(true);
+  const [bots, setBots] = useState([]);
+
+
+const {refreshChats,chats} = useAuthContext()
+
+
+  useEffect(()=>{
+    const fetchBots = async () =>{
+      try {
+        const response = await botApi.get('/all')
+        setBots(response.data?.data)
+         if (verified) await refreshChats(); 
+      } catch (err) {
+       console.error(err) 
+      }
+    }
+    fetchBots()
+  },[])
 
   useGSAP(() => {
     gsap.to(".sidebar", {
@@ -24,7 +45,7 @@ function App() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-black text-white">
       <div className="sidebar fixed top-0 left-0 h-screen w-64 z-20">
-        <LeftMenu />
+        <LeftMenu chats={chats} />
       </div>
 
       <button
@@ -57,7 +78,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <HomePage bots={bots} />
               </ProtectedRoute>
             }
           />

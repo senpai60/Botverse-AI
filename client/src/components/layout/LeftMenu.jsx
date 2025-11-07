@@ -1,15 +1,31 @@
 // src/components/LeftMenu.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageCircle, PlusCircle, User, Settings, Heart } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import {chatApi} from '../../api/chatApi'
 
-const LeftMenu = () => {
+const LeftMenu = ({chats}) => {
   const { pathname } = useLocation();
-  const [chats] = useState([
-    { id: 1, name: "Luna 💕" },
+
+  /* 
+  {   id: 1, name: "Luna 💕" },
     { id: 2, name: "Nova 🔥" },
     { id: 3, name: "Aria 🌙" },
-  ]);
+
+  */
+
+
+// useEffect(()=>{
+//   const fetchUserChats = async () => {
+//     try {
+//       const response =  await chatApi.get('/')
+//       setChats(response.data?.data)
+//     } catch (err) {
+//       console.err
+//     }
+//   }
+//   fetchUserChats()
+// },[])
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-pink-500/40 to-purple-800/40 backdrop-blur-2xl border-r border-white/10 flex flex-col">
@@ -64,24 +80,27 @@ const LeftMenu = () => {
         <div className="flex items-center justify-between text-white/60 mb-2">
           <span className="text-sm uppercase tracking-wider">Chats</span>
           <Link to={"/create-bot"}>
-          <PlusCircle  className="w-5 h-5 hover:text-pink-400 cursor-pointer" />
+            <PlusCircle className="w-5 h-5 hover:text-pink-400 cursor-pointer" />
           </Link>
         </div>
 
-        {chats.map((chat) => (
-          <Link
-            to={`/chat/${chat.id}`}
-            key={chat.id}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-              pathname === `/chat/${chat.id}`
-                ? "bg-pink-400/30 text-white"
-                : "text-white/70 hover:bg-white/10"
-            }`}
-          >
-            <MessageCircle className="w-4 h-4 text-pink-300" />
-            <span className="truncate">{chat.name}</span>
-          </Link>
-        ))}
+        {chats.length > 0 ? (
+          chats.map((chat) => ( // <-- CORRECT: Removed the inner {}
+          <Link
+            to={`/chat/${chat._id}`}
+            key={chat._id}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+              pathname === `/chat/${chat.id}`
+                ? "bg-pink-400/30 text-white"
+                : "text-white/70 hover:bg-white/10"
+            }`}
+          >
+            <MessageCircle className="w-4 h-4 text-pink-300" />
+            <span className="truncate">{chat?.bot?.name}</span>
+          </Link>
+        ))
+        ):<p>Please start new chat with bots from <a href="/" className="text-pink-400 font-bold uppercase underline underline-offset-4">home</a> sections</p>}
+      
       </div>
 
       {/* Footer */}
