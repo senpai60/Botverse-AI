@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 
+import { handleChatMessage } from "../controllers/chatController.js";
 import { verifyAuth } from "../middlewares/verifyAuth.js";
 import { sendError, sendSuccess } from "../utils/responseHandler.js";
 
@@ -157,5 +158,34 @@ router.post("/", verifyAuth, async (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * @route   POST /api/chats/:chatId/message
+ * @desc    Add a message to an existing chat (from user or bot)
+ * @access  Private
+ */
+router.post("/:chatId/message", verifyAuth,handleChatMessage, async (req, res, next) => {
+  try {
+    const { chatId } = req.params;
+    const { sender, text, emotion = "neutral" } = req.body;
+    const userId = req.user.userId;
+
+    if (!text || !sender) return sendError(res, 400, "Sender and text are required");
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) return sendError(res, 404, "Chat not found");
+
+    // Security: ensure user owns this chat
+    if (chat.user.toString() !== userId) {
+      return sendError(res, 403, "You don't own this chat");
+    }
+
+    await chat.addMessage(sender, text, emotion);
+    sendSuccess(res, 200, "Message added", chat.messages.at(-1)); // only latest message
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 export default router;

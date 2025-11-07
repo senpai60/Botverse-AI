@@ -11,4 +11,6 @@ export const config = {
   JWT_AUDIENCE: process.env.JWT_AUDIENCE || "FlirtAI-users",
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
   CLIENT_URI: process.env.CLIENT_URI || "http://localhost:5173",
+  OPENAI_API_KEY:process.env.OPENAI_API_KEY,
+  GROQ_API_KEY:process.env.GROQ_API_KEY,
 };
